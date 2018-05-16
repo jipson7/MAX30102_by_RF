@@ -31,11 +31,10 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <SD.h>
 #include "algorithm_by_RF.h"
 #include "max30102.h"
 
-//#define DEBUG // Uncomment for debug output to the Serial stream
+#define DEBUG // Uncomment for debug output to the Serial stream
 //#define TEST_MAXIM_ALGORITHM // Uncomment if you want to include results returned by the original MAXIM algorithm
 //#define SAVE_RAW_DATA // Uncomment if you want raw data coming out of the sensor saved to SD card. Red signal first, IR second.
 
@@ -43,7 +42,6 @@
   #include "algorithm.h" 
 #endif
 
-File dataFile;
 // ADALOGGER pins
 const byte chipSelect = 4;
 const byte cardDetect = 7;
@@ -52,7 +50,6 @@ const byte ledPin = 13; // Red LED on ADALOGGER
 const byte sdIndicatorPin = 8; // Green LED on ADALOGGER
 const byte oxiInt = 10; // ADALOGGER pin connected to MAX30102 INT
 
-bool cardOK;
 uint32_t elapsedTime,timeStart;
 
 uint32_t aun_ir_buffer[BUFFER_SIZE]; //infrared LED sensor data
@@ -89,73 +86,9 @@ void setup() {
   measuredvbat /= 1024; // convert to voltage
 
   char my_status[20];
-  if(HIGH==digitalRead(cardDetect)) {
-    // we'll use the initialization code from the utility libraries
-    // since we're just testing if the card is working!
-    if(!SD.begin(chipSelect)) {
-      cardOK=false;
-      strncpy(my_status,"CardInit!",9);
-    } else cardOK=true;
-  } else {
-    cardOK=false;
-    strncpy(my_status,"NoSDCard!",9);
-  }
-
-  if(cardOK) {
-    long count=0;
-    char fname[20];
-    do {
-//      if(useClock && now.month()<13 && now.day()<32) {
-//        sprintf(fname,"%d-%d_%d.txt",now.month(),now.day(),++count);
-//      } else {
-        sprintf(fname,"data_%d.txt",++count);
-//      }
-    } while(SD.exists(fname));
-    dataFile = SD.open(fname, FILE_WRITE);
-    strncpy(my_status,fname,19);
-  }
   
-#ifdef DEBUG
-  while(Serial.available()==0)  //wait until user presses a key
-  {
-    Serial.print(F("Vbatt=\t"));
-    Serial.println(measuredvbat);
-    Serial.println(my_status);
-    Serial.println(dataFile,HEX);
-    Serial.println(F("Press any key to start conversion"));
-    delay(1000);
-  }
-  uch_dummy=Serial.read();
-#endif
-
-  blinkLED(ledPin,cardOK);
   old_n_spo2=0.0;
   maxim_max30102_init();  //initialize the MAX30102
-
-  k=0;
-  dataFile.println(F("Vbatt=\t"));
-  dataFile.println(measuredvbat);
-  dataFile.println(my_status);
-#ifdef TEST_MAXIM_ALGORITHM
-  dataFile.print(F("Time[s]\tSpO2\tHR\tSpO2_MX\tHR_MX\tClock\tRatio\tCorr"));
-#else
-  dataFile.print(F("Time[s]\tSpO2\tHR\tClock\tRatio\tCorr"));
-#endif
-#ifdef SAVE_RAW_DATA
-  int8_t i;
-  // These are headers for the red signal
-  for(i=0;i<BUFFER_SIZE;++i) {
-    dataFile.print("\t");
-    dataFile.print(i);
-  }
-  // These are headers for the infrared signal
-  for(i=0;i<BUFFER_SIZE;++i) {
-    dataFile.print("\t");
-    dataFile.print(i);
-  }
-#endif
-  dataFile.println("");
-  timeStart=millis();
 }
 
 //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 4 seconds
@@ -227,48 +160,14 @@ void loop() {
 #else   
   if(ch_hr_valid && ch_spo2_valid) { 
 #endif
-    ++k;
-    dataFile.print(elapsedTime);
-    dataFile.print("\t");
-    dataFile.print(n_spo2);
-    dataFile.print("\t");
-    dataFile.print(n_heart_rate, DEC);
-    dataFile.print("\t");
-#ifdef TEST_MAXIM_ALGORITHM
-    dataFile.print(n_spo2_maxim);
-    dataFile.print("\t");
-    dataFile.print(n_heart_rate_maxim, DEC);
-    dataFile.print("\t");
-#endif
-    dataFile.print(hr_str);
-    dataFile.print("\t");
-    dataFile.print(ratio);
-    dataFile.print("\t");
-    dataFile.print(correl);
-#ifdef SAVE_RAW_DATA
-    // Save raw data for unusual O2 levels
-    for(i=0;i<BUFFER_SIZE;++i)
-    {
-      dataFile.print(F("\t"));
-      dataFile.print(aun_red_buffer[i], DEC);
-    }
-    for(i=0;i<BUFFER_SIZE;++i)
-    {
-      dataFile.print(F("\t"));
-      dataFile.print(aun_ir_buffer[i], DEC);    
-    }
-#endif
-    dataFile.println("");
+
     old_n_spo2=n_spo2;
     // Blink green LED to indicate save event
     digitalWrite(sdIndicatorPin,HIGH);
     delay(10);
     digitalWrite(sdIndicatorPin,LOW);
     // FLush SD buffer every 10 points
-    if(k>=10) {
-      dataFile.flush();
-      k=0;
-    }
+
   }
 }
 
