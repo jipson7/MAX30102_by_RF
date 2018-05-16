@@ -36,7 +36,6 @@
 
 #define DEBUG // Uncomment for debug output to the Serial stream
 //#define TEST_MAXIM_ALGORITHM // Uncomment if you want to include results returned by the original MAXIM algorithm
-//#define SAVE_RAW_DATA // Uncomment if you want raw data coming out of the sensor saved to SD card. Red signal first, IR second.
 
 #ifdef TEST_MAXIM_ALGORITHM
   #include "algorithm.h" 
@@ -154,20 +153,16 @@ void loop() {
 #endif
 #endif
 
-  //save samples and calculation result to SD card
 #ifdef TEST_MAXIM_ALGORITHM
   if(ch_hr_valid && ch_spo2_valid || ch_hr_valid_maxim && ch_spo2_valid_maxim) {
 #else   
   if(ch_hr_valid && ch_spo2_valid) { 
 #endif
-
     old_n_spo2=n_spo2;
     // Blink green LED to indicate save event
     digitalWrite(sdIndicatorPin,HIGH);
     delay(10);
     digitalWrite(sdIndicatorPin,LOW);
-    // FLush SD buffer every 10 points
-
   }
 }
 
