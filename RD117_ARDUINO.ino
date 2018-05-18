@@ -46,7 +46,6 @@ const byte chipSelect = 4;
 const byte cardDetect = 7;
 const byte batteryPin = 9;
 const byte ledPin = 13; // Red LED on ADALOGGER
-const byte sdIndicatorPin = 8; // Green LED on ADALOGGER
 const byte oxiInt = 10; // ADALOGGER pin connected to MAX30102 INT
 
 uint32_t elapsedTime,timeStart;
@@ -63,8 +62,6 @@ void setup() {
   pinMode(oxiInt, INPUT);  //pin D10 connects to the interrupt output pin of the MAX30102
   pinMode(ledPin,OUTPUT);
   digitalWrite(ledPin,LOW);
-  pinMode(sdIndicatorPin,OUTPUT);
-  digitalWrite(sdIndicatorPin,LOW);
 
   Wire.begin();
 
@@ -159,10 +156,6 @@ void loop() {
   if(ch_hr_valid && ch_spo2_valid) { 
 #endif
     old_n_spo2=n_spo2;
-    // Blink green LED to indicate save event
-    digitalWrite(sdIndicatorPin,HIGH);
-    delay(10);
-    digitalWrite(sdIndicatorPin,LOW);
   }
 }
 
