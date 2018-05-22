@@ -35,11 +35,7 @@
 #include "max30102.h"
 
 #define DEBUG // Uncomment for debug output to the Serial stream
-//#define TEST_MAXIM_ALGORITHM // Uncomment if you want to include results returned by the original MAXIM algorithm
 
-#ifdef TEST_MAXIM_ALGORITHM
-  #include "algorithm.h" 
-#endif
 
 // ADALOGGER pins
 const byte chipSelect = 4;
@@ -130,31 +126,8 @@ void loop() {
   Serial.println("------");
 #endif
 
-#ifdef TEST_MAXIM_ALGORITHM
-  //calculate heart rate and SpO2 after 100 samples (4 seconds of samples) using MAXIM's method
-  float n_spo2_maxim;  //SPO2 value
-  int8_t ch_spo2_valid_maxim;  //indicator to show if the SPO2 calculation is valid
-  int32_t n_heart_rate_maxim; //heart rate value
-  int8_t  ch_hr_valid_maxim;  //indicator to show if the heart rate calculation is valid
-  maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2_maxim, &ch_spo2_valid_maxim, &n_heart_rate_maxim, &ch_hr_valid_maxim); 
-#ifdef DEBUG
-  Serial.println("--MX--");
-  Serial.print(elapsedTime);
-  Serial.print("\t");
-  Serial.print(n_spo2_maxim);
-  Serial.print("\t");
-  Serial.print(n_heart_rate_maxim, DEC);
-  Serial.print("\t");
-  Serial.println(hr_str);
-  Serial.println("------");
-#endif
-#endif
-
-#ifdef TEST_MAXIM_ALGORITHM
-  if(ch_hr_valid && ch_spo2_valid || ch_hr_valid_maxim && ch_spo2_valid_maxim) {
-#else   
+ 
   if(ch_hr_valid && ch_spo2_valid) { 
-#endif
     old_n_spo2=n_spo2;
   }
 }
