@@ -145,7 +145,7 @@ void loop() {
   Serial.print("oxygen ");
   Serial.println(n_spo2);
   
-  Serial.print("hr");
+  Serial.print("hr ");
   Serial.println(n_heart_rate, DEC);
 
   if(ch_hr_valid && ch_spo2_valid) { 
