@@ -143,10 +143,19 @@ void loop() {
   rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
 
   Serial.print("oxygen ");
-  Serial.println(n_spo2);
+  Serial.print(n_spo2);
+  Serial.print(" ");
+  Serial.println(ch_spo2_valid, DEC);
   
   Serial.print("hr ");
-  Serial.println(n_heart_rate, DEC);
+  Serial.print(n_heart_rate, DEC);
+  Serial.print(" ");
+  Serial.println(ch_hr_valid, DEC);
+
+  Serial.print("ratio ");
+  Serial.println(ratio);
+  Serial.print("correl ");
+  Serial.println(correl);
 
   if(ch_hr_valid && ch_spo2_valid) { 
     old_n_spo2=n_spo2;
