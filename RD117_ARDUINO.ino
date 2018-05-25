@@ -156,6 +156,7 @@ void loop() {
 
   Serial.println("ratio " + String(ratio));
   Serial.println("correl " + String(correl));
+  Serial.println("end");
 
   if(ch_hr_valid && ch_spo2_valid) { 
     old_n_spo2=n_spo2;
