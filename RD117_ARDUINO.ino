@@ -52,7 +52,7 @@ MPU9250 mySensor;
 float aX, aY, aZ, aSqrt, gX, gY, gZ;
 
 //Output vars
-String led_output, accel_output, gyro_output;
+String led_output, accel_output, gyro_output, algo_output;
 
 void setup() {
 
@@ -142,20 +142,20 @@ void loop() {
   //calculate heart rate and SpO2 after 100 samples (4 seconds of samples) using Robert's method
   rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
 
-  Serial.print("oxygen ");
-  Serial.print(n_spo2);
-  Serial.print(" ");
-  Serial.println(ch_spo2_valid, DEC);
+  algo_output = "oxygen ";
+  algo_output += String(n_spo2);
+  algo_output += " ";
+  algo_output += String(ch_spo2_valid, DEC);
+  Serial.println(algo_output);
   
-  Serial.print("hr ");
-  Serial.print(n_heart_rate, DEC);
-  Serial.print(" ");
-  Serial.println(ch_hr_valid, DEC);
+  algo_output = "hr ";
+  algo_output += String(n_heart_rate, DEC);
+  algo_output += " ";
+  algo_output += String(ch_hr_valid, DEC);
+  Serial.println(algo_output);
 
-  Serial.print("ratio ");
-  Serial.println(ratio);
-  Serial.print("correl ");
-  Serial.println(correl);
+  Serial.println("ratio " + String(ratio));
+  Serial.println("correl " + String(correl));
 
   if(ch_hr_valid && ch_spo2_valid) { 
     old_n_spo2=n_spo2;
