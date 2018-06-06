@@ -33,7 +33,13 @@
 #include <SPI.h>
 #include "algorithm_by_RF.h"
 #include "max30102.h"
+
+// Uncomment this line to disable motion sensors
+//#define MOTION
+
+#ifdef MOTION
 #include <MPU9250_asukiaaa.h>
+#endif
 
 // ADALOGGER pins
 const byte chipSelect = 4;
@@ -47,9 +53,10 @@ float old_n_spo2;  // Previous SPO2 value
 uint8_t uch_dummy,k;
 
 //MPU9250 Vars
+#ifdef MOTION
 MPU9250 mySensor;
-
 float aX, aY, aZ, aSqrt, gX, gY, gZ;
+#endif
 
 //Output vars
 String led_output, accel_output, gyro_output, algo_output;
@@ -71,11 +78,13 @@ void setup() {
   old_n_spo2=0.0;
   maxim_max30102_init();  //initialize the MAX30102
 
+#ifdef MOTION
   //SETUP MPU9250
   mySensor.setWire(&Wire);
   mySensor.beginAccel();
   mySensor.beginGyro();
-  //mySensor.beginMag();
+
+#endif
 
 }
 
@@ -108,6 +117,7 @@ void loop() {
     led_output += String(aun_ir_buffer[i], DEC);    
     Serial.println(led_output);
 
+#ifdef MOTION
     //Get Accel Values
     elapsedTime=millis()-timeStart;
     accel_output = "accel ";
@@ -137,6 +147,7 @@ void loop() {
     gyro_output += " ";
     gyro_output += String(gZ);
     Serial.println(gyro_output);
+#endif
   }
 
   //calculate heart rate and SpO2 after 100 samples (4 seconds of samples) using Robert's method
