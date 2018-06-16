@@ -34,8 +34,8 @@
 #include "algorithm_by_RF.h"
 #include "max30102.h"
 
-// Uncomment this line to disable motion sensors
-//#define MOTION
+// comment this line to disable motion sensors
+#define MOTION
 
 #ifdef MOTION
 #include <MPU9250_asukiaaa.h>
@@ -111,7 +111,6 @@ void loop() {
     Serial.println("offset " + String(elapsedTime, DEC));
     
     led_output = "led ";
-    led_output += " ";
     led_output += String(aun_red_buffer[i], DEC);
     led_output += " ";
     led_output += String(aun_ir_buffer[i], DEC);    
