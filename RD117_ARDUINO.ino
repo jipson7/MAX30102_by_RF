@@ -59,7 +59,7 @@ float aX, aY, aZ, aSqrt, gX, gY, gZ;
 #endif
 
 //Output vars
-String led_output, accel_output, gyro_output, algo_output;
+String led_output, accel_output, gyro_output, algo_output, offsetOutput;
 
 void setup() {
 
@@ -101,6 +101,7 @@ void loop() {
   //read 100 samples, and determine the signal range
   timeStart = millis();
   Serial.println("start");
+  Serial.flush();
   for(i=0;i<BUFFER_SIZE;i++)
   {
     //Get LED Values
@@ -108,13 +109,16 @@ void loop() {
     maxim_max30102_read_fifo((aun_red_buffer+i), (aun_ir_buffer+i));  //read from MAX30102 FIFO
     
     elapsedTime=millis()-timeStart;
-    Serial.println("offset " + String(elapsedTime, DEC));
+    offsetOutput = "offset " + String(elapsedTime, DEC);
+    Serial.println(offsetOutput);
+    Serial.flush();
     
     led_output = "led ";
     led_output += String(aun_red_buffer[i], DEC);
     led_output += " ";
     led_output += String(aun_ir_buffer[i], DEC);    
     Serial.println(led_output);
+    Serial.flush();
 
 #ifdef MOTION
     //Get Accel Values
@@ -133,6 +137,7 @@ void loop() {
     accel_output += " ";
     accel_output += String(aSqrt);
     Serial.println(accel_output);
+    Serial.flush();
 
     elapsedTime=millis()-timeStart;
     gyro_output = "gyro ";
@@ -146,6 +151,7 @@ void loop() {
     gyro_output += " ";
     gyro_output += String(gZ);
     Serial.println(gyro_output);
+    Serial.flush();
 #endif
   }
 
@@ -157,19 +163,25 @@ void loop() {
   algo_output += " ";
   algo_output += String(ch_spo2_valid, DEC);
   Serial.println(algo_output);
+  Serial.flush();
   
   algo_output = "hr ";
   algo_output += String(n_heart_rate, DEC);
   algo_output += " ";
   algo_output += String(ch_hr_valid, DEC);
   Serial.println(algo_output);
+  Serial.flush();
 
   Serial.println("ratio " + String(ratio));
+  Serial.flush();
   Serial.println("correl " + String(correl));
+  Serial.flush();
   Serial.println("end");
+  Serial.flush();
 
   if(ch_hr_valid && ch_spo2_valid) { 
     old_n_spo2=n_spo2;
   }
 }
+
 
