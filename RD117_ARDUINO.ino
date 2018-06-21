@@ -31,7 +31,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
-#include "algorithm_by_RF.h"
 #include "max30102.h"
 
 // comment this line to disable motion sensors
@@ -45,11 +44,7 @@
 const byte chipSelect = 4;
 const byte oxiInt = 10; // ADALOGGER pin connected to MAX30102 INT
 
-uint32_t elapsedTime,timeStart;
-
-uint32_t aun_ir_buffer[BUFFER_SIZE]; //infrared LED sensor data
-uint32_t aun_red_buffer[BUFFER_SIZE];  //red LED sensor data
-float old_n_spo2;  // Previous SPO2 value
+uint32_t red, ir;
 uint8_t uch_dummy,k;
 
 //MPU9250 Vars
@@ -59,7 +54,7 @@ float aX, aY, aZ, aSqrt, gX, gY, gZ;
 #endif
 
 //Output vars
-String led_output, accel_output, gyro_output, algo_output, offsetOutput;
+String result;
 
 void setup() {
 
@@ -72,10 +67,7 @@ void setup() {
   delay(1000);
 
   maxim_max30102_read_reg(REG_INTR_STATUS_1,&uch_dummy);  //Reads/clears the interrupt status register
-
-  char my_status[20];
   
-  old_n_spo2=0.0;
   maxim_max30102_init();  //initialize the MAX30102
 
 #ifdef MOTION
@@ -88,100 +80,48 @@ void setup() {
 
 }
 
-//Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 4 seconds
 void loop() {
-  float n_spo2,ratio,correl;  //SPO2 value
-  int8_t ch_spo2_valid;  //indicator to show if the SPO2 calculation is valid
-  int32_t n_heart_rate; //heart rate value
-  int8_t  ch_hr_valid;  //indicator to show if the heart rate calculation is valid
-  int8_t i;
-  char hr_str[10];
   
-  //buffer length of 100 stores 4 seconds of samples running at 25sps
-  //read 100 samples, and determine the signal range
-  timeStart = millis();
-  Serial.println("start");
-  Serial.flush();
-  for(i=0;i<BUFFER_SIZE;i++)
-  {
-    //Get LED Values
-    while(digitalRead(oxiInt)==1);  //wait until the interrupt pin asserts
-    maxim_max30102_read_fifo((aun_red_buffer+i), (aun_ir_buffer+i));  //read from MAX30102 FIFO
-    
-    elapsedTime=millis()-timeStart;
-    offsetOutput = "offset " + String(elapsedTime, DEC);
-    Serial.println(offsetOutput);
-    Serial.flush();
-    
-    led_output = "led ";
-    led_output += String(aun_red_buffer[i], DEC);
-    led_output += " ";
-    led_output += String(aun_ir_buffer[i], DEC);    
-    Serial.println(led_output);
-    Serial.flush();
+
+  while(digitalRead(oxiInt)==1);
+  maxim_max30102_read_fifo(&red, &ir);  //read from MAX30102 FIFO
+
+  result = "{";
+  result += "\"red\":" + String(red, DEC);
+  result += ",\"ir\":" + String(ir, DEC);
 
 #ifdef MOTION
-    //Get Accel Values
-    elapsedTime=millis()-timeStart;
-    accel_output = "accel ";
-    mySensor.accelUpdate();
-    aX = mySensor.accelX();
-    aY = mySensor.accelY();
-    aZ = mySensor.accelZ();
-    aSqrt = mySensor.accelSqrt();
-    accel_output += String(aX);
-    accel_output += " ";
-    accel_output += String(aY);
-    accel_output += " ";
-    accel_output += String(aZ);
-    accel_output += " ";
-    accel_output += String(aSqrt);
-    Serial.println(accel_output);
-    Serial.flush();
+  //Get Accel Values
+  mySensor.accelUpdate();
+  aX = mySensor.accelX();
+  aY = mySensor.accelY();
+  aZ = mySensor.accelZ();
+  aSqrt = mySensor.accelSqrt();
 
-    elapsedTime=millis()-timeStart;
-    gyro_output = "gyro ";
-    mySensor.gyroUpdate();
-    gX = mySensor.gyroX();
-    gY = mySensor.gyroY();
-    gZ = mySensor.gyroZ();
-    gyro_output += String(gX);
-    gyro_output += " ";
-    gyro_output += String(gY);
-    gyro_output += " ";
-    gyro_output += String(gZ);
-    Serial.println(gyro_output);
-    Serial.flush();
+  result += ",\"accel\": {";
+  result += "\"x\":" + String(aX);
+  result += ",\"y\":" + String(aY);
+  result += ",\"z\":" + String(aZ);
+  result += ",\"sqrt\":" + String(aSqrt);
+  result += "}"; 
+
+  mySensor.gyroUpdate();
+  gX = mySensor.gyroX();
+  gY = mySensor.gyroY();
+  gZ = mySensor.gyroZ();
+
+  result += ",\"gyro\": {";
+  result += "\"x\":" + String(gX);
+  result += ",\"y\":" + String(gY);
+  result += ",\"z\":" + String(gZ);
+  result += "}"; 
+
 #endif
-  }
 
-  //calculate heart rate and SpO2 after 100 samples (4 seconds of samples) using Robert's method
-  rf_heart_rate_and_oxygen_saturation(aun_ir_buffer, BUFFER_SIZE, aun_red_buffer, &n_spo2, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid, &ratio, &correl); 
-
-  algo_output = "oxygen ";
-  algo_output += String(n_spo2);
-  algo_output += " ";
-  algo_output += String(ch_spo2_valid, DEC);
-  Serial.println(algo_output);
-  Serial.flush();
-  
-  algo_output = "hr ";
-  algo_output += String(n_heart_rate, DEC);
-  algo_output += " ";
-  algo_output += String(ch_hr_valid, DEC);
-  Serial.println(algo_output);
+  result += "}"; 
+  Serial.println(result);
   Serial.flush();
 
-  Serial.println("ratio " + String(ratio));
-  Serial.flush();
-  Serial.println("correl " + String(correl));
-  Serial.flush();
-  Serial.println("end");
-  Serial.flush();
-
-  if(ch_hr_valid && ch_spo2_valid) { 
-    old_n_spo2=n_spo2;
-  }
 }
 
 
