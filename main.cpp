@@ -6,11 +6,9 @@
 #include "max30102.h"
 #include "algorithm.h"
 
-using namespace std;
-
-int main(int argc, char **argv) {
-
-  cout << "This is a test" << endl;
-
+int main() {
+  for (std::string line; std::getline(std::cin, line);) {
+    std::cout << line << std::endl;
+  }
   return 0;
-}
+ }
