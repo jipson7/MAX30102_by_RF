@@ -63,7 +63,6 @@
 #ifndef MAX30102_H_
 #define MAX30102_H_
 
-#include <arduino.h>
 //#define I2C_WRITE_ADDR 0xAE
 //#define I2C_READ_ADDR 0xAF
 #define I2C_WRITE_ADDR 0x57 // 7-bit version of the above
