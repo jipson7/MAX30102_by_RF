@@ -35,9 +35,6 @@ int main() {
   string line, red_line, ir_line;
   getline(cin, line);
 
-  string s = "split on    whitespace   ";
-  vector<string> result;
-
   istringstream liness(line);
 
   liness >> red_line;
