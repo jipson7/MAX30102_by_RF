@@ -35,7 +35,7 @@
 #define ALGORITHM_BY_RF_H_
 
 #define FS 25    //sampling frequency
-#define BUFFER_SIZE  (FS*4)
+#define BUFFER_SIZE  (FS* 4)
 #define FS60 (FS*60) // Conversion factor for heart rate
 #define MAX_HR 125 // Maximal heart rate
 #define MIN_HR 40 // Minimal heart rate
