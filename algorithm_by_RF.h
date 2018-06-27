@@ -33,6 +33,7 @@
 */
 #ifndef ALGORITHM_BY_RF_H_
 #define ALGORITHM_BY_RF_H_
+#include <stdint.h>
 
 #define FS 25    //sampling frequency
 #define BUFFER_SIZE  (FS* 4)
