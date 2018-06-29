@@ -18,29 +18,30 @@ uint32_t ir[sample_size];
 string run_maxim_algo() {
   float oxygen;
   int32_t hr;
-  int8_t oxygen_valid, hr_valid;
+  int8_t oxygen_valid;
+  int8_t hr_valid;
 
   maxim_heart_rate_and_oxygen_saturation(ir, sample_size, red, &oxygen, &oxygen_valid, &hr, &hr_valid);
 
   ostringstream os;
 
-  os << "{\"hr\": " << hr << ", \"hr_valid\":" << hr_valid << ", ";
-  os << "\"oxygen\": " << oxygen << ", \"oxygen_valid\":" << oxygen_valid << "}";
+  os << "{\"hr\": " << hr << ", \"hr_valid\":" << to_string(hr_valid) << ", ";
+  os << "\"oxygen\": " << oxygen << ", \"oxygen_valid\":" << to_string(oxygen_valid) << "}";
   return os.str();
 }
 
 string run_enhanced_algo() {
   float oxygen, ratio, correl;
   int32_t hr;
-  int8_t oxygen_valid, hr_valid;
-
+  int8_t oxygen_valid;
+  int8_t hr_valid;
   rf_heart_rate_and_oxygen_saturation(ir, sample_size, red, &oxygen, &oxygen_valid, &hr, &hr_valid, &ratio, &correl);
 
   ostringstream os;
 
-  os << "{\"hr\": " << hr << ", \"hr_valid\":" << hr_valid << ", ";
-  os << "\"oxygen\": " << oxygen << ", \"oxygen_valid\":" << oxygen_valid << ", ";
-  os << "\"ratio\": " << ratio << ", \"correlation\":" << correl << "}";
+  os << "{\"hr\": " << hr << ", \"hr_valid\":" << to_string(hr_valid) << ", ";
+  os << "\"oxygen\": " << oxygen << ", \"oxygen_valid\":" << to_string(oxygen_valid);
+  os << ", \"ratio\": " << ratio << ", \"correlation\":" << correl << "}";
   return os.str();
 }
 
