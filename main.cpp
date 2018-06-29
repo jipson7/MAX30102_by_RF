@@ -78,8 +78,13 @@ int main() {
   string maxim_result = run_maxim_algo();
   string enhanced_result = run_enhanced_algo();
 
-  cout << maxim_result << endl;
-  cout << enhanced_result << endl;
+
+  ostringstream os;
+
+  os << "{\"maxim\": " << maxim_result << ", ";
+  os << "\"enhanced\": " << enhanced_result << "}";
+
+  cout << os.str() << endl;
 
   return 0;
 }
