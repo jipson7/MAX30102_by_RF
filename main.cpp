@@ -31,7 +31,9 @@ string run_maxim_algo() {
 }
 
 string run_enhanced_algo() {
-  float oxygen, ratio, correl;
+  // Invalid ratio default param
+  float ratio = -999;
+  float oxygen, correl;
   int32_t hr;
   int8_t oxygen_valid;
   int8_t hr_valid;
